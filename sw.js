@@ -1,5 +1,5 @@
 // Lets the app open even without internet.
-const CACHE = 'budget-v2';
+const CACHE = 'budget-v5';
 const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))));

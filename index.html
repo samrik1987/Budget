@@ -4,56 +4,78 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>My Budget</title>
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#24262a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Budget">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --main:#0f766e; --need:#16a34a; --want:#dc2626; --bg:#f4f6f8; --card:#fff; --text:#1f2937; --muted:#6b7280; }
+  :root { color-scheme:dark;
+          --bg:#1a1b1e; --head:#24262a; --card:#222428; --line:#33363b; --field:#1c1d20;
+          --text:#ececec; --muted:#a7aab0; --main:#9ec6b4; --ontext:#16201b;
+          --need:#7cc99a; --want:#f0948c; --warn:#e8c170; }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text);
-         padding:env(safe-area-inset-top) 0 calc(80px + env(safe-area-inset-bottom)); }
-  header { background:var(--main); color:#fff; padding:16px; }
-  header h1 { margin:0; font-size:20px; }
-  .monthnav { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
-  .monthnav button { background:rgba(255,255,255,.2); color:#fff; border:0; border-radius:8px; padding:8px 14px; font-size:18px; }
-  .monthnav span { font-size:17px; font-weight:600; }
+  body, input, select, button { font-family:"Nunito", -apple-system, "Segoe UI", Roboto, sans-serif; font-size:15px; }
+  body { margin:0; background:var(--bg); color:var(--text); line-height:1.4;
+         padding:env(safe-area-inset-top) 0 calc(78px + env(safe-area-inset-bottom)); }
+  header { background:var(--head); padding:14px 16px; border-bottom:1px solid var(--line); }
+  header h1 { margin:0; font-size:20px; font-weight:700; }
+  .monthnav { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+  .monthnav button { background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:4px 14px; font-size:20px; }
+  .monthnav span { font-size:16px; font-weight:700; }
   main { padding:12px; max-width:600px; margin:0 auto; }
-  .card { background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .card { background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; border:1px solid var(--line); }
+  .card > b:first-child, .ttl { font-size:16px; font-weight:700; display:block; margin-bottom:6px; }
   .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .stat small { color:var(--muted); display:block; font-size:12px; }
-  .stat b { font-size:20px; }
-  .need { color:var(--need); } .want { color:var(--want); }
-  .bar { height:10px; background:#e5e7eb; border-radius:6px; overflow:hidden; margin-top:10px; }
+  .stat small { color:var(--muted); display:block; font-size:13px; }
+  .stat b { font-size:19px; }
+  .need { color:var(--need); } .want { color:var(--want); } .warn { color:var(--warn); }
+  .bar { height:10px; background:var(--line); border-radius:6px; overflow:hidden; margin-top:10px; }
   .bar div { height:100%; background:var(--main); }
+  .bar.near div { background:var(--warn); }
   .bar.over div { background:var(--want); }
-  label { font-size:13px; color:var(--muted); display:block; margin:8px 0 4px; }
-  input, select { width:100%; padding:12px; font-size:16px; border:1px solid #d1d5db; border-radius:10px; background:#fff; }
+  label { font-size:14px; color:var(--muted); display:block; margin:10px 0 4px; font-weight:600; }
+  input, select { width:100%; padding:11px; border:1px solid var(--line); border-radius:10px; background:var(--field); color:var(--text); }
+  input:focus, select:focus { outline:2px solid var(--main); border-color:transparent; }
+  optgroup { color:var(--muted); } option { color:var(--text); background:var(--card); }
   .tags { display:flex; gap:8px; }
-  .tags button { flex:1; padding:12px; font-size:15px; border-radius:10px; border:2px solid #d1d5db; background:#fff; }
-  .tags button.on.n { border-color:var(--need); background:#dcfce7; color:#166534; font-weight:600; }
-  .tags button.on.u { border-color:var(--want); background:#fee2e2; color:#991b1b; font-weight:600; }
-  .btn { width:100%; padding:14px; font-size:17px; border:0; border-radius:10px; background:var(--main); color:#fff; margin-top:12px; font-weight:600; }
-  .btn.light { background:#e5e7eb; color:var(--text); }
-  .day h3 { margin:0 0 8px; font-size:15px; display:flex; justify-content:space-between; }
-  .item { display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid #f0f0f0; }
+  .tags button { flex:1; padding:11px; border-radius:10px; border:1px solid var(--line); background:var(--field); color:var(--muted); }
+  .tags button.on.n { border-color:var(--need); background:#1f3329; color:var(--need); font-weight:700; }
+  .tags button.on.u { border-color:var(--want); background:#3a2422; color:var(--want); font-weight:700; }
+  .btn { width:100%; padding:12px; font-size:16px; border:0; border-radius:10px; background:var(--main); color:var(--ontext); margin-top:12px; font-weight:700; }
+  .btn.light { background:var(--field); color:var(--text); border:1px solid var(--line); }
+  .day h3 { margin:0 0 6px; font-size:16px; display:flex; justify-content:space-between; }
+  .item { display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--line); }
   .item .desc { flex:1; }
-  .item .desc small { color:var(--muted); display:block; }
-  .pill { font-size:11px; padding:2px 8px; border-radius:20px; }
-  .pill.n { background:#dcfce7; color:#166534; } .pill.u { background:#fee2e2; color:#991b1b; }
-  .del { background:none; border:0; color:#9ca3af; font-size:18px; padding:4px 8px; }
-  .empty { text-align:center; color:var(--muted); padding:30px 0; }
-  nav { position:fixed; bottom:0; left:0; right:0; background:#fff; display:flex; border-top:1px solid #e5e7eb; padding-bottom:env(safe-area-inset-bottom); }
-  nav button { flex:1; background:none; border:0; padding:12px 0; font-size:13px; color:var(--muted); }
+  .item .desc small { color:var(--muted); display:block; font-size:13px; }
+  .pill { font-size:12px; padding:1px 8px; border-radius:20px; }
+  .pill.n { background:#1f3329; color:var(--need); } .pill.u { background:#3a2422; color:var(--want); }
+  .del { background:none; border:0; color:var(--muted); font-size:18px; padding:4px 8px; }
+  .empty { text-align:center; color:var(--muted); padding:24px 0; }
+  nav { position:fixed; bottom:0; left:0; right:0; background:var(--head); display:flex; border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); }
+  nav button { flex:1; background:none; border:0; padding:8px 0; font-size:13px; color:var(--muted); }
   nav button.on { color:var(--main); font-weight:700; }
-  nav button span { display:block; font-size:22px; }
+  nav button span { display:block; font-size:20px; }
   .hidden { display:none; }
-  .catrow { display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid #f0f0f0; }
-  .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#111; color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; transition:.3s; pointer-events:none; }
+  .catrow { display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid var(--line); }
+  .toast { position:fixed; bottom:96px; left:50%; transform:translateX(-50%); background:var(--main); color:var(--ontext); padding:9px 18px; border-radius:20px; opacity:0; transition:.3s; pointer-events:none; font-weight:700; }
   .toast.show { opacity:1; }
+  .alert { border-radius:12px; padding:12px 14px; margin-bottom:12px; font-weight:600; border:1px solid; }
+  .alert.near { background:#3a3220; border-color:#6b5a2e; color:var(--warn); }
+  .alert.over { background:#3a2422; border-color:#6e3a36; color:var(--want); }
+  .alert.ok { background:#1f3329; border-color:#2f5a44; color:var(--need); }
+  .alert small { display:block; font-weight:400; color:var(--text); margin-top:3px; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin:4px 0 6px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+  svg text { font-family:inherit; }
+  .tip { display:flex; gap:10px; padding:9px 0; border-top:1px solid var(--line); }
+  .tip span:first-child { font-size:18px; }
+  .tip b { color:var(--text); }
+  .tip div { color:var(--muted); }
 </style>
 </head>
 <body>
@@ -67,6 +89,7 @@
 <main>
   <!-- ADD TAB -->
   <section id="tab-add">
+    <div id="addAlert"></div>
     <div class="card">
       <label>Amount (₹)</label>
       <input id="amount" type="number" inputmode="decimal" placeholder="0">
@@ -93,6 +116,30 @@
   <!-- DAILY TAB -->
   <section id="tab-daily" class="hidden"><div id="dailyList"></div></section>
 
+  <!-- INSIGHTS TAB -->
+  <section id="tab-insights" class="hidden">
+    <div id="insAlert"></div>
+    <div class="card">
+      <span class="ttl">Spending vs budget</span>
+      <div class="legend"><span><i style="background:var(--main)"></i>Total so far</span><span><i style="background:var(--want)"></i>Budget line</span><span><i style="background:var(--muted)"></i>Safe pace</span></div>
+      <div id="chartCum"></div>
+    </div>
+    <div class="card">
+      <span class="ttl">Day-wise spending</span>
+      <div class="legend"><span><i style="background:var(--need)"></i>Necessary</span><span><i style="background:var(--want)"></i>Unnecessary</span></div>
+      <div id="chartDaily"></div>
+    </div>
+    <div class="card">
+      <span class="ttl">Which days of the week cost the most?</span>
+      <div class="legend"><span>Average day-to-day spend (rent, bills and other fixed costs left out) · costliest day highlighted</span></div>
+      <div id="chartWeek"></div>
+    </div>
+    <div class="card">
+      <span class="ttl">Necessary vs unnecessary</span>
+      <div id="chartSplit"></div>
+    </div>
+  </section>
+
   <!-- MONTH TAB -->
   <section id="tab-month" class="hidden">
     <div class="card">
@@ -103,7 +150,7 @@
         <div class="stat"><small>Unnecessary</small><b class="want" id="mWant">₹0</b></div>
       </div>
       <div class="bar" id="mBar"><div style="width:0"></div></div>
-      <p id="mLeft" style="margin:8px 0 0;font-size:14px"></p>
+      <p id="mLeft" style="margin:8px 0 0"></p>
     </div>
     <div class="card">
       <b>By category</b>
@@ -125,7 +172,8 @@
 <nav>
   <button data-tab="add" class="on"><span>➕</span>Add</button>
   <button data-tab="daily"><span>📅</span>Daily</button>
-  <button data-tab="month"><span>📊</span>Monthly</button>
+  <button data-tab="month"><span>🗓️</span>Monthly</button>
+  <button data-tab="insights"><span>📈</span>Insights</button>
 </nav>
 <div class="toast" id="toast"></div>
 
@@ -246,7 +294,8 @@ function render() {
   $('mBudget').textContent = data.budget ? money(data.budget) : 'Not set';
   const pct = data.budget ? Math.min(100, total / data.budget * 100) : 0;
   $('mBar').firstElementChild.style.width = pct + '%';
-  $('mBar').classList.toggle('over', data.budget && total > data.budget);
+  $('mBar').classList.toggle('over', !!data.budget && total > data.budget);
+  $('mBar').classList.toggle('near', !!data.budget && total <= data.budget && total >= data.budget * 0.8);
   $('mLeft').textContent = data.budget
     ? (total <= data.budget ? `✅ ${money(data.budget - total)} left this month` : `⚠️ Over budget by ${money(total - data.budget)}`)
     : 'Set a monthly budget below to track how much is left.';
@@ -257,6 +306,137 @@ function render() {
   const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
   $('catList').innerHTML = sorted.length ? sorted.map(([c, v]) => `<div class="catrow"><span>${esc(c)}</span><b>${money(v)}</b></div>`).join('')
     : '<div class="empty">Nothing yet</div>';
+
+  renderInsights(list);
+}
+
+// ---------- Insights (charts + tips) ----------
+const C = { main:'#9ec6b4', need:'#7cc99a', want:'#f0948c', warn:'#e8c170', muted:'#a7aab0', line:'#33363b', text:'#ececec', dim:'#5d6168' };
+const OUTSIDE_FOOD = ['Zomato', 'Swiggy', 'Restaurant / Hotel', 'Street food', 'Tea / Snacks outside', 'Sweets / Bakery', 'Office canteen'];
+const FIXED = ['Rent','Society maintenance','Electricity','Water bill','Mobile recharge','Internet / WiFi','DTH / TV','OTT (Netflix, Hotstar...)','EMI / Loan','School fees','Health insurance','Savings / Investment','Grocery (mixed / monthly)','Gas cylinder (LPG)'];
+const moneyR = n => money(Math.round(n));
+const short = n => n >= 100000 ? '₹' + (n / 100000).toFixed(1).replace('.0', '') + 'L' : n >= 1000 ? '₹' + (n / 1000).toFixed(1).replace('.0', '') + 'k' : '₹' + Math.round(n);
+
+function monthInfo() {
+  const [y, m] = viewMonth.split('-').map(Number);
+  const days = new Date(y, m, 0).getDate();
+  const cur = todayStr().slice(0, 7);
+  const elapsed = viewMonth < cur ? days : viewMonth > cur ? 0 : Number(todayStr().slice(8, 10));
+  return { y, m, days, elapsed };
+}
+
+function budgetStatus(total, mi) {
+  const b = data.budget;
+  if (!b) return null;
+  const pct = total / b * 100;
+  const left = b - total, daysLeft = mi.days - mi.elapsed;
+  const proj = mi.elapsed ? total / mi.elapsed * mi.days : 0;
+  if (total > b) return { cls: 'over', msg: `🚨 Budget crossed! Over by ${moneyR(total - b)}`,
+    sub: `You've spent ${Math.round(pct)}% of your ${moneyR(b)} budget.` };
+  if (pct >= 80) return { cls: 'near', msg: `⚠️ ${Math.round(pct)}% of budget used: only ${moneyR(left)} left`,
+    sub: daysLeft > 0 ? `Keep spending under ${moneyR(left / daysLeft)} a day for the next ${daysLeft} days.` : '' };
+  return { cls: 'ok', msg: `✅ On track: ${moneyR(left)} left (${Math.round(pct)}% used)`,
+    sub: daysLeft > 0 && proj ? `At this pace you'll spend about ${moneyR(proj)} by month end.` : '' };
+}
+function alertHTML(s) { return s ? `<div class="alert ${s.cls}">${s.msg}${s.sub ? `<small>${s.sub}</small>` : ''}</div>` : ''; }
+
+function svgWrap(h, inner) { return `<svg viewBox="0 0 340 ${h}" width="100%" style="display:block">${inner}</svg>`; }
+function yAxis(max, x0, y0, plotH, w) {
+  let g = '';
+  for (let i = 0; i <= 3; i++) {
+    const v = max * i / 3, y = y0 - plotH * i / 3;
+    g += `<line x1="${x0}" x2="${w}" y1="${y}" y2="${y}" stroke="${C.line}" stroke-width="1"/>
+          <text x="${x0 - 4}" y="${y + 4}" fill="${C.muted}" font-size="10" text-anchor="end">${short(v)}</text>`;
+  }
+  return g;
+}
+
+function renderInsights(list) {
+  const mi = monthInfo();
+  const total = sum(list);
+  const status = budgetStatus(total, mi);
+  $('addAlert').innerHTML = viewMonth === todayStr().slice(0, 7) && status && status.cls !== 'ok' ? alertHTML(status) : '';
+  $('insAlert').innerHTML = status ? alertHTML(status)
+    : '<div class="alert near">Set a monthly budget in the Monthly tab to see budget alerts.</div>';
+
+  // daily totals
+  const dN = Array(mi.days + 1).fill(0), dU = Array(mi.days + 1).fill(0);
+  list.forEach(e => { const d = Number(e.date.slice(8, 10)); (e.tag === 'necessary' ? dN : dU)[d] += e.amount; });
+
+  if (!list.length) {
+    ['chartCum', 'chartDaily', 'chartWeek', 'chartSplit'].forEach(id => $(id).innerHTML = '<div class="empty">Add some expenses to see this chart</div>');
+  } else {
+    const X0 = 38, W = 334, TOP = 12, H = 150, Y0 = TOP + H;
+    const xAt = d => X0 + (W - X0) * (d - 0.5) / mi.days;
+
+    // 1) cumulative vs budget
+    const lastD = mi.elapsed || mi.days;
+    let cum = 0, pts = [], crossDay = 0;
+    for (let d = 1; d <= lastD; d++) { cum += dN[d] + dU[d]; pts.push([d, cum]); if (!crossDay && data.budget && cum > data.budget) crossDay = d; }
+    const maxC = Math.max(cum, data.budget || 0) * 1.12 || 1;
+    const yAt = v => Y0 - H * v / maxC;
+    let g = yAxis(maxC, X0, Y0, H, W);
+    if (data.budget) {
+      g += `<line x1="${xAt(0.5)}" y1="${yAt(0)}" x2="${xAt(mi.days + 0.5)}" y2="${yAt(data.budget)}" stroke="${C.muted}" stroke-dasharray="3 4" stroke-width="1.5"/>`;
+      g += `<line x1="${X0}" x2="${W}" y1="${yAt(data.budget)}" y2="${yAt(data.budget)}" stroke="${C.want}" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+      g += `<text x="${W}" y="${yAt(data.budget) - 5}" fill="${C.want}" font-size="11" text-anchor="end">Budget ${short(data.budget)}</text>`;
+    }
+    const area = `M${xAt(1)},${Y0} ` + pts.map(([d, v]) => `L${xAt(d)},${yAt(v)}`).join(' ') + ` L${xAt(lastD)},${Y0} Z`;
+    g += `<path d="${area}" fill="${crossDay ? C.want : C.main}" opacity="0.15"/>`;
+    const line = (a, col) => a.length > 1 ? `<polyline points="${a.map(([d, v]) => xAt(d) + ',' + yAt(v)).join(' ')}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>` : '';
+    if (crossDay) {
+      g += line(pts.filter(p => p[0] <= crossDay - 1), C.main) + line(pts.filter(p => p[0] >= Math.max(1, crossDay - 1)), C.want);
+      const cv = pts[crossDay - 1][1];
+      g += `<circle cx="${xAt(crossDay)}" cy="${yAt(cv)}" r="5" fill="${C.want}" stroke="#1a1b1e" stroke-width="2"/>`;
+      g += `<text x="${X0 + 6}" y="${TOP + 8}" fill="${C.want}" font-size="11" font-weight="700">● Budget crossed on day ${crossDay}</text>`;
+    } else g += line(pts, C.main);
+    const [ld, lv] = pts[pts.length - 1];
+    g += `<circle cx="${xAt(ld)}" cy="${yAt(lv)}" r="4" fill="${crossDay ? C.want : C.main}"/>`;
+    g += `<text x="${X0}" y="${Y0 + 16}" fill="${C.muted}" font-size="10">1</text><text x="${W}" y="${Y0 + 16}" fill="${C.muted}" font-size="10" text-anchor="end">${mi.days}</text>
+          <text x="${(X0 + W) / 2}" y="${Y0 + 16}" fill="${C.muted}" font-size="10" text-anchor="middle">Day of month</text>`;
+    $('chartCum').innerHTML = svgWrap(Y0 + 22, g);
+
+    // 2) daily stacked bars
+    const maxD = Math.max(...dN.map((v, i) => v + dU[i])) * 1.1 || 1;
+    const yD = v => H * v / maxD, bw = Math.max(2, (W - X0) / mi.days - 2);
+    g = yAxis(maxD, X0, Y0, H, W);
+    const dailyLimit = data.budget ? data.budget / mi.days : 0;
+    for (let d = 1; d <= mi.days; d++) {
+      const x = xAt(d) - bw / 2, hn = yD(dN[d]), hu = yD(dU[d]);
+      if (hn) g += `<rect x="${x}" y="${Y0 - hn}" width="${bw}" height="${hn}" fill="${C.need}" rx="1.5"/>`;
+      if (hu) g += `<rect x="${x}" y="${Y0 - hn - hu}" width="${bw}" height="${hu}" fill="${C.want}" rx="1.5"/>`;
+    }
+    if (dailyLimit && dailyLimit < maxD) g += `<line x1="${X0}" x2="${W}" y1="${Y0 - yD(dailyLimit)}" y2="${Y0 - yD(dailyLimit)}" stroke="${C.warn}" stroke-dasharray="4 3" stroke-width="1.5"/>
+      <text x="${W}" y="${Y0 - yD(dailyLimit) - 4}" fill="${C.warn}" font-size="10" text-anchor="end">Daily limit ${short(dailyLimit)}</text>`;
+    [1, 8, 15, 22, 29].filter(d => d <= mi.days).forEach(d => g += `<text x="${xAt(d)}" y="${Y0 + 14}" fill="${C.muted}" font-size="10" text-anchor="middle">${d}</text>`);
+    $('chartDaily').innerHTML = svgWrap(Y0 + 18, g);
+
+    // 3) weekday averages (Mon..Sun)
+    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dd = Array(mi.days + 1).fill(0);
+    list.filter(e => !FIXED.includes(e.cat)).forEach(e => dd[Number(e.date.slice(8, 10))] += e.amount);
+    const wSum = Array(7).fill(0), wCnt = Array(7).fill(0);
+    for (let d = 1; d <= lastD; d++) { const wd = (new Date(mi.y, mi.m - 1, d).getDay() + 6) % 7; wSum[wd] += dd[d]; wCnt[wd]++; }
+    const avg = wSum.map((s, i) => wCnt[i] ? s / wCnt[i] : 0);
+    const maxW = Math.max(...avg) * 1.15 || 1, top = avg.indexOf(Math.max(...avg));
+    g = '';
+    const rowH = 24;
+    avg.forEach((v, i) => {
+      const y = 6 + i * rowH, w = (W - 90) * v / maxW, hi = i === top && v > 0;
+      g += `<text x="0" y="${y + 13}" fill="${hi ? C.want : C.text}" font-size="12" font-weight="${hi ? 700 : 400}">${names[i]}</text>
+            <rect x="40" y="${y}" width="${Math.max(w, 1)}" height="17" rx="4" fill="${hi ? C.want : C.dim}"/>
+            <text x="${44 + w}" y="${y + 13}" fill="${hi ? C.want : C.muted}" font-size="11">${short(v)}</text>`;
+    });
+    $('chartWeek').innerHTML = svgWrap(7 * rowH + 6, g);
+
+    // 4) split bar
+    const need = sum(list.filter(e => e.tag === 'necessary')), want = total - need, pn = need / total * 100;
+    $('chartSplit').innerHTML = `<div style="display:flex;height:18px;border-radius:9px;overflow:hidden;margin:8px 0">
+        <div style="width:${pn}%;background:${C.need}"></div><div style="flex:1;background:${C.want}"></div></div>
+      <div style="display:flex;justify-content:space-between"><span class="need">Necessary ${Math.round(pn)}% · ${money(need)}</span>
+      <span class="want">${Math.round(100 - pn)}% · ${money(want)}</span></div>`;
+
+  }
 }
 
 // ---------- Month nav & tabs ----------
@@ -264,7 +444,7 @@ $('prevM').onclick = () => { viewMonth = shiftMonth(viewMonth, -1); render(); };
 $('nextM').onclick = () => { viewMonth = shiftMonth(viewMonth, 1); render(); };
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.remove('on')); b.classList.add('on');
-  ['add', 'daily', 'month'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
+  ['add', 'daily', 'month', 'insights'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
   window.scrollTo(0, 0);
 });
 
