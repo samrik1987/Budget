@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Budget</title>
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Budget">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root { --main:#0f766e; --need:#16a34a; --want:#dc2626; --bg:#f4f6f8; --card:#fff; --text:#1f2937; --muted:#6b7280; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text);
+         padding:env(safe-area-inset-top) 0 calc(80px + env(safe-area-inset-bottom)); }
+  header { background:var(--main); color:#fff; padding:16px; }
+  header h1 { margin:0; font-size:20px; }
+  .monthnav { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+  .monthnav button { background:rgba(255,255,255,.2); color:#fff; border:0; border-radius:8px; padding:8px 14px; font-size:18px; }
+  .monthnav span { font-size:17px; font-weight:600; }
+  main { padding:12px; max-width:600px; margin:0 auto; }
+  .card { background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat small { color:var(--muted); display:block; font-size:12px; }
+  .stat b { font-size:20px; }
+  .need { color:var(--need); } .want { color:var(--want); }
+  .bar { height:10px; background:#e5e7eb; border-radius:6px; overflow:hidden; margin-top:10px; }
+  .bar div { height:100%; background:var(--main); }
+  .bar.over div { background:var(--want); }
+  label { font-size:13px; color:var(--muted); display:block; margin:8px 0 4px; }
+  input, select { width:100%; padding:12px; font-size:16px; border:1px solid #d1d5db; border-radius:10px; background:#fff; }
+  .tags { display:flex; gap:8px; }
+  .tags button { flex:1; padding:12px; font-size:15px; border-radius:10px; border:2px solid #d1d5db; background:#fff; }
+  .tags button.on.n { border-color:var(--need); background:#dcfce7; color:#166534; font-weight:600; }
+  .tags button.on.u { border-color:var(--want); background:#fee2e2; color:#991b1b; font-weight:600; }
+  .btn { width:100%; padding:14px; font-size:17px; border:0; border-radius:10px; background:var(--main); color:#fff; margin-top:12px; font-weight:600; }
+  .btn.light { background:#e5e7eb; color:var(--text); }
+  .day h3 { margin:0 0 8px; font-size:15px; display:flex; justify-content:space-between; }
+  .item { display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid #f0f0f0; }
+  .item .desc { flex:1; }
+  .item .desc small { color:var(--muted); display:block; }
+  .pill { font-size:11px; padding:2px 8px; border-radius:20px; }
+  .pill.n { background:#dcfce7; color:#166534; } .pill.u { background:#fee2e2; color:#991b1b; }
+  .del { background:none; border:0; color:#9ca3af; font-size:18px; padding:4px 8px; }
+  .empty { text-align:center; color:var(--muted); padding:30px 0; }
+  nav { position:fixed; bottom:0; left:0; right:0; background:#fff; display:flex; border-top:1px solid #e5e7eb; padding-bottom:env(safe-area-inset-bottom); }
+  nav button { flex:1; background:none; border:0; padding:12px 0; font-size:13px; color:var(--muted); }
+  nav button.on { color:var(--main); font-weight:700; }
+  nav button span { display:block; font-size:22px; }
+  .hidden { display:none; }
+  .catrow { display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid #f0f0f0; }
+  .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#111; color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; transition:.3s; pointer-events:none; }
+  .toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>💰 My Budget</h1>
+  <div class="monthnav">
+    <button id="prevM">‹</button><span id="monthLabel"></span><button id="nextM">›</button>
+  </div>
+</header>
+
+<main>
+  <!-- ADD TAB -->
+  <section id="tab-add">
+    <div class="card">
+      <label>Amount (₹)</label>
+      <input id="amount" type="number" inputmode="decimal" placeholder="0">
+      <label>Note (optional)</label>
+      <input id="desc" type="text" placeholder="e.g. Weekly veg from market">
+      <label>Type of expense</label>
+      <select id="cat"></select>
+      <div id="newCatBox" class="hidden">
+        <label>Name of your new item</label>
+        <input id="newCat" type="text" placeholder="e.g. Ghee, Tuition fee">
+      </div>
+      <label>Tag</label>
+      <div class="tags">
+        <button id="tagN" class="n on">✅ Necessary</button>
+        <button id="tagU" class="u">❌ Unnecessary</button>
+      </div>
+      <label>Date</label>
+      <input id="date" type="date">
+      <button class="btn" id="saveBtn">Add expense</button>
+    </div>
+    <div class="card" id="todayCard"></div>
+  </section>
+
+  <!-- DAILY TAB -->
+  <section id="tab-daily" class="hidden"><div id="dailyList"></div></section>
+
+  <!-- MONTH TAB -->
+  <section id="tab-month" class="hidden">
+    <div class="card">
+      <div class="grid">
+        <div class="stat"><small>Spent this month</small><b id="mTotal">₹0</b></div>
+        <div class="stat"><small>Budget</small><b id="mBudget">₹0</b></div>
+        <div class="stat"><small>Necessary</small><b class="need" id="mNeed">₹0</b></div>
+        <div class="stat"><small>Unnecessary</small><b class="want" id="mWant">₹0</b></div>
+      </div>
+      <div class="bar" id="mBar"><div style="width:0"></div></div>
+      <p id="mLeft" style="margin:8px 0 0;font-size:14px"></p>
+    </div>
+    <div class="card">
+      <b>By category</b>
+      <div id="catList"></div>
+    </div>
+    <div class="card">
+      <b>Settings</b>
+      <label>Monthly budget (₹)</label>
+      <input id="budgetInput" type="number" inputmode="decimal" placeholder="e.g. 30000">
+      <button class="btn" id="saveBudget">Save budget</button>
+      <button class="btn light" id="exportBtn">⬇️ Backup data (download file)</button>
+      <button class="btn light" id="importBtn">⬆️ Restore from backup</button>
+      <button class="btn light" id="csvBtn">📄 Export this month to Excel (CSV)</button>
+      <input type="file" id="importFile" accept=".json" class="hidden">
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button data-tab="add" class="on"><span>➕</span>Add</button>
+  <button data-tab="daily"><span>📅</span>Daily</button>
+  <button data-tab="month"><span>📊</span>Monthly</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Storage (saved on your phone) ----------
+const KEY = 'budget-app-v1';
+let data = load();
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || { expenses: [], budget: 0 }; }
+  catch (e) { return { expenses: [], budget: 0 }; }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
+
+// ---------- Helpers ----------
+const $ = id => document.getElementById(id);
+const money = n => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+const todayStr = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+let viewMonth = todayStr().slice(0, 7); // "YYYY-MM"
+let tag = 'necessary';
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+function monthName(ym) { const [y, m] = ym.split('-'); return new Date(y, m - 1, 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' }); }
+function shiftMonth(ym, n) { let [y, m] = ym.split('-').map(Number); m += n; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } return y + '-' + String(m).padStart(2, '0'); }
+function monthExpenses() { return data.expenses.filter(e => e.date.startsWith(viewMonth)); }
+function sum(list) { return list.reduce((s, e) => s + e.amount, 0); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+function itemHTML(e) {
+  const t = e.tag === 'necessary' ? '<span class="pill n">Necessary</span>' : '<span class="pill u">Unnecessary</span>';
+  return `<div class="item"><div class="desc">${esc(e.desc || e.cat)}<small>${esc(e.cat)} · ${t}</small></div>
+          <b>${money(e.amount)}</b><button class="del" onclick="delExp('${e.id}')">🗑</button></div>`;
+}
+
+// ---------- Expense types (dropdown) ----------
+const CATEGORIES = {
+  '🥛 Daily essentials': ['Milk', 'Curd / Dahi', 'Bread', 'Eggs', 'Paneer', 'Butter / Ghee', 'Newspaper'],
+  '🥦 Vegetables & fruits': ['Vegetables', 'Fruits', 'Onions & potatoes', 'Coconut', 'Flowers / Pooja items'],
+  '🍗 Meat & fish': ['Chicken', 'Mutton', 'Fish', 'Prawns / Seafood'],
+  '🛒 Groceries (kirana)': ['Rice', 'Atta / Flour', 'Dal / Pulses', 'Cooking oil', 'Sugar / Jaggery', 'Salt & spices / Masala',
+    'Tea / Coffee', 'Snacks & biscuits', 'Dry fruits', 'Packaged food / Noodles', 'Water cans', 'Grocery (mixed / monthly)'],
+  '🍔 Food from outside': ['Zomato', 'Swiggy', 'Restaurant / Hotel', 'Street food', 'Tea / Snacks outside', 'Sweets / Bakery', 'Office canteen'],
+  '🧼 Household & cleaning': ['Detergent / Soap', 'Toiletries', 'Cleaning supplies', 'Gas cylinder (LPG)', 'Kitchen items', 'Home repairs', 'Maid / House help'],
+  '💡 Bills': ['Electricity', 'Water bill', 'Mobile recharge', 'Internet / WiFi', 'DTH / TV', 'OTT (Netflix, Hotstar...)', 'Rent', 'Society maintenance'],
+  '🚗 Transport': ['Petrol / Diesel', 'Auto / Cab (Ola, Uber, Rapido)', 'Bus / Metro / Train', 'Vehicle service', 'Parking / Toll'],
+  '👶 Kids': ['School fees', 'Books & stationery', 'Toys', 'Kids clothes', 'Diapers / Baby care', 'Tuition / Classes', 'Kids snacks'],
+  '💊 Health': ['Medicines', 'Doctor', 'Tests / Lab', 'Health insurance'],
+  '🛍️ Shopping & personal': ['Clothes', 'Footwear', 'Online shopping (Amazon, Flipkart...)', 'Salon / Grooming', 'Electronics', 'Gifts'],
+  '🎉 Fun & other': ['Movies / Outing', 'Travel / Trip', 'Festival', 'Donation / Temple', 'EMI / Loan', 'Savings / Investment', 'Other']
+};
+function buildCatDropdown() {
+  const sel = $('cat'), keep = sel.value;
+  let html = '';
+  for (const [group, items] of Object.entries(CATEGORIES))
+    html += `<optgroup label="${group}">` + items.map(i => `<option>${esc(i)}</option>`).join('') + '</optgroup>';
+  const mine = data.customCats || [];
+  if (mine.length) html += '<optgroup label="⭐ My items">' + mine.map(i => `<option>${esc(i)}</option>`).join('') + '</optgroup>';
+  html += '<option value="__new__">➕ Add my own item...</option>';
+  sel.innerHTML = html;
+  if (keep && keep !== '__new__') sel.value = keep;
+}
+$('cat').onchange = () => $('newCatBox').classList.toggle('hidden', $('cat').value !== '__new__');
+
+// ---------- Add expense ----------
+$('date').value = todayStr();
+$('tagN').onclick = () => { tag = 'necessary'; $('tagN').classList.add('on'); $('tagU').classList.remove('on'); };
+$('tagU').onclick = () => { tag = 'unnecessary'; $('tagU').classList.add('on'); $('tagN').classList.remove('on'); };
+$('saveBtn').onclick = () => {
+  const amount = parseFloat($('amount').value);
+  if (!amount || amount <= 0) { toast('Please enter an amount'); return; }
+  let cat = $('cat').value;
+  if (cat === '__new__') {
+    cat = $('newCat').value.trim();
+    if (!cat) { toast('Please type a name for your new item'); return; }
+    data.customCats = data.customCats || [];
+    if (!data.customCats.includes(cat)) data.customCats.push(cat);
+    $('newCat').value = ''; $('newCatBox').classList.add('hidden');
+    buildCatDropdown(); $('cat').value = cat;
+  }
+  data.expenses.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    date: $('date').value || todayStr(), amount, desc: $('desc').value.trim(), cat, tag });
+  save();
+  $('amount').value = ''; $('desc').value = '';
+  toast('Saved ✔'); render();
+};
+window.delExp = id => {
+  if (!confirm('Delete this expense?')) return;
+  data.expenses = data.expenses.filter(e => e.id !== id); save(); render();
+};
+
+// ---------- Render ----------
+function render() {
+  $('monthLabel').textContent = monthName(viewMonth);
+
+  // Today card
+  const today = data.expenses.filter(e => e.date === todayStr());
+  $('todayCard').innerHTML = `<div class="day"><h3><span>Today</span><span>${money(sum(today))}</span></h3>` +
+    (today.length ? today.map(itemHTML).join('') : '<div class="empty">No expenses yet today</div>') + '</div>';
+
+  // Daily list for month
+  const list = monthExpenses();
+  const byDay = {};
+  list.forEach(e => (byDay[e.date] = byDay[e.date] || []).push(e));
+  const days = Object.keys(byDay).sort().reverse();
+  $('dailyList').innerHTML = days.length ? days.map(d => {
+    const items = byDay[d];
+    const label = new Date(d + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+    const n = sum(items.filter(e => e.tag === 'necessary')), u = sum(items.filter(e => e.tag !== 'necessary'));
+    return `<div class="card day"><h3><span>${label}</span><span>${money(n + u)}</span></h3>
+      <small><span class="need">Necessary ${money(n)}</span> · <span class="want">Unnecessary ${money(u)}</span></small>
+      ${items.map(itemHTML).join('')}</div>`;
+  }).join('') : '<div class="card empty">No expenses this month</div>';
+
+  // Monthly summary
+  const total = sum(list), need = sum(list.filter(e => e.tag === 'necessary')), want = total - need;
+  $('mTotal').textContent = money(total);
+  $('mNeed').textContent = money(need);
+  $('mWant').textContent = money(want);
+  $('mBudget').textContent = data.budget ? money(data.budget) : 'Not set';
+  const pct = data.budget ? Math.min(100, total / data.budget * 100) : 0;
+  $('mBar').firstElementChild.style.width = pct + '%';
+  $('mBar').classList.toggle('over', data.budget && total > data.budget);
+  $('mLeft').textContent = data.budget
+    ? (total <= data.budget ? `✅ ${money(data.budget - total)} left this month` : `⚠️ Over budget by ${money(total - data.budget)}`)
+    : 'Set a monthly budget below to track how much is left.';
+  if (data.budget) $('budgetInput').value = data.budget;
+
+  const cats = {};
+  list.forEach(e => cats[e.cat] = (cats[e.cat] || 0) + e.amount);
+  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  $('catList').innerHTML = sorted.length ? sorted.map(([c, v]) => `<div class="catrow"><span>${esc(c)}</span><b>${money(v)}</b></div>`).join('')
+    : '<div class="empty">Nothing yet</div>';
+}
+
+// ---------- Month nav & tabs ----------
+$('prevM').onclick = () => { viewMonth = shiftMonth(viewMonth, -1); render(); };
+$('nextM').onclick = () => { viewMonth = shiftMonth(viewMonth, 1); render(); };
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.remove('on')); b.classList.add('on');
+  ['add', 'daily', 'month'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
+  window.scrollTo(0, 0);
+});
+
+// ---------- Settings, backup, restore ----------
+$('saveBudget').onclick = () => { data.budget = parseFloat($('budgetInput').value) || 0; save(); render(); toast('Budget saved'); };
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click();
+}
+$('exportBtn').onclick = () => download('budget-backup-' + todayStr() + '.json', JSON.stringify(data, null, 2), 'application/json');
+$('csvBtn').onclick = () => {
+  const rows = [['Date', 'Amount', 'Description', 'Category', 'Tag']]
+    .concat(monthExpenses().sort((a, b) => a.date.localeCompare(b.date)).map(e => [e.date, e.amount, e.desc, e.cat, e.tag]));
+  download('expenses-' + viewMonth + '.csv', rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n'), 'text/csv');
+};
+$('importBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!Array.isArray(d.expenses)) throw 0;
+      if (!confirm('Replace current data with this backup?')) return;
+      data = d; save(); buildCatDropdown(); render(); toast('Restored ✔');
+    } catch (e) { toast('That file is not a valid backup'); }
+  };
+  r.readAsText(f);
+};
+
+// Offline support
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+buildCatDropdown();
+render();
+</script>
+</body>
+</html>
